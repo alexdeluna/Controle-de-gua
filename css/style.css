@@ -31,3 +31,126 @@ html, body { max-width: 100%; overflow-x: hidden; }
   .action-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .view, .section-heading, .tank-card, .metric-card, .history-card { min-width: 0; }
 }
+
+
+/* Navegação mobile: a aplicação ocupa a viewport; apenas o conteúdo da tela rola. */
+html, body {
+  width: 100%;
+  height: 100%;
+  height: 100dvh;
+  min-height: 0;
+  margin: 0;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+body {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.topbar {
+  position: relative;
+  top: auto;
+  z-index: 11;
+  flex: 0 0 60px;
+  height: 60px;
+  min-width: 0;
+  padding-left: max(12px, env(safe-area-inset-left));
+  padding-right: max(12px, env(safe-area-inset-right));
+}
+main#appMain {
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 14px 12px calc(82px + env(safe-area-inset-bottom));
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+.view {
+  width: 100%;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.section-heading, .tank-card, .metric-card, .history-card, .form-card,
+.report-card, .info-card, .alert-card {
+  min-width: 0;
+  max-width: 100%;
+}
+.bottom-nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: calc(64px + env(safe-area-inset-bottom));
+  padding: 0 0 env(safe-area-inset-bottom);
+  justify-content: stretch;
+}
+.nav-item {
+  min-width: 0;
+  max-width: none;
+  padding: 5px 2px 3px;
+  touch-action: manipulation;
+}
+.nav-item small {
+  line-height: 1.1;
+  white-space: nowrap;
+}
+.toast {
+  bottom: calc(74px + env(safe-area-inset-bottom));
+}
+/* Os filtros quebram linha; não há faixa horizontal para arrastar. */
+.filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  max-width: 100%;
+  overflow: visible;
+  padding-bottom: 10px;
+}
+.filter {
+  max-width: 100%;
+  white-space: normal;
+  touch-action: manipulation;
+}
+input, select, textarea, button {
+  max-width: 100%;
+  touch-action: manipulation;
+}
+.auth-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: max(18px, env(safe-area-inset-top)) 12px max(18px, env(safe-area-inset-bottom));
+}
+.auth-card {
+  margin: auto;
+  min-width: 0;
+}
+@media (max-width: 380px) {
+  .topbar { flex-basis: 56px; height: 56px; }
+  .brand { gap: 7px; }
+  .brand strong { font-size: 14px; }
+  .brand small { font-size: 11px; }
+  .icon-button { width: 36px; height: 36px; flex: 0 0 36px; }
+  main#appMain { padding-left: 10px; padding-right: 10px; }
+  .section-heading h1 { font-size: 22px; }
+  .tank-card { gap: 8px; padding: 13px; }
+  .tank-visual { width: 62px; height: 82px; flex-basis: 62px; }
+  .volume { font-size: clamp(28px, 8vw, 35px); }
+  .two-col { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+}
+@media (min-width: 700px) {
+  main#appMain { padding-top: 22px; padding-bottom: 90px; }
+  .topbar { flex-basis: 68px; height: 68px; }
+  .bottom-nav { height: 68px; padding-bottom: 0; }
+}
