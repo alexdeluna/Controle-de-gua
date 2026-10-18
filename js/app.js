@@ -208,21 +208,21 @@ import { auth, authApi, watchResidence, syncResidenceState, deleteResidenceRecor
     return state.measurements.filter(m=>(m.tank||"cisterna")===tank)
       .sort((a,b)=>(a.createdAt||stamp(a)).localeCompare(b.createdAt||stamp(b))).slice(-1)[0]||null;
   }
+  // Consumo residencial é representado pela água transferida da cisterna para a caixa.
+  // A média usa a data/hora dos eventos, inclusive em registros retroativos.
   function calculateConsumption(){
-    const ms=state.measurements.filter(m=>(m.tank||"cisterna")==="cisterna").sort((a,b)=>stamp(a).localeCompare(stamp(b)));
-    const intervals=[];
-    for(let i=1;i<ms.length;i++){
-      const a=ms[i-1],b=ms[i],start=stamp(a),end=stamp(b),days=(new Date(end)-new Date(start))/86400000;
-      if(days<=0)continue;
-      const received=state.supplies.filter(x=>stamp(x)>start&&stamp(x)<=end&&x.liters!==null&&x.liters!==undefined).reduce((s,x)=>s+x.liters,0);
-      const transferred=state.transfers.filter(x=>stamp(x)>start&&stamp(x)<=end).reduce((s,x)=>s+x.liters,0);
-      // Depleção da cisterna que não foi explicada por recargas ou transferências é uma perda/uso estimado.
-      const unexplained=a.liters+received-transferred-b.liters;
-      if(unexplained>=0)intervals.push({days,liters:unexplained});
-    }
-    if(!intervals.length)return null;
-    const days=intervals.reduce((s,x)=>s+x.days,0);return days>0?intervals.reduce((s,x)=>s+x.liters,0)/days:null;
+    const transfers=state.transfers
+      .filter(x=>Number.isFinite(Number(x.liters))&&Number(x.liters)>0&&stamp(x))
+      .slice().sort((a,b)=>stamp(a).localeCompare(stamp(b)));
+    if(transfers.length<2)return null;
+    const first=stamp(transfers[0]);
+    const last=stamp(transfers[transfers.length-1]);
+    const elapsedDays=(new Date(last)-new Date(first))/86400000;
+    if(!Number.isFinite(elapsedDays)||elapsedDays<=0)return null;
+    const totalLiters=transfers.reduce((sum,x)=>sum+Number(x.liters),0);
+    return totalLiters/elapsedDays;
   }
+
   function currentMonthKey(){return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}`;}
   function setDefaultDateFields(){["supply","transfer","measurement"].forEach(p=>{if($(p+"Date")&&!$(p+"Date").value)$(p+"Date").value=localDate(now);if($(p+"Time")&&!$(p+"Time").value)$(p+"Time").value=localTime(now);});if(!$('reportMonth').value)$('reportMonth').value=currentMonthKey();}
   function showView(name){document.querySelectorAll(".view").forEach(v=>v.classList.toggle("active",v.id===`view-${name}`));document.querySelectorAll(".nav-item").forEach(b=>b.classList.toggle("active",b.dataset.view===name));if(name==="settings")fillSettings();if(["supply","transfer","measurement"].includes(name))setDefaultDateFields();if(name==="reports")renderReports();if(name==="transfer"){$("transferLiters").value=$("transferLiters").value||"1000";updateTransferHint();}$("appMain").scrollTo({top:0,behavior:"smooth"});}
